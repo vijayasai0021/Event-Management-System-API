@@ -90,4 +90,47 @@ exports.updateCategory = async(req,res)=>{
 };
 
 //delete category
+exports.deleteCategory = async(req,res)=>{
+    const categoryId = parseInt(req.params.id,10);
+
+    try{
+        //check if the category exist
+        const category = await prisma.category.findUnique({
+            where:{
+                id:categoryId
+            }
+        });
+        if(!category){
+            return res.status(404).json({
+                success:false,
+                message:'there is no category for the mentioned id'
+            });
+        }
+        //check if the user is authorized to delete the category
+        if(req.user.role!=='ADMIN'){
+            return res.status(403).json({
+                success:false,
+                message:'You cannot delete the or alter the category'
+            });
+        }
+
+        await prisma.category.delete({
+            where:{
+                id:categoryId
+            }
+        });
+        return res.status(200).json({
+            success:true,
+            message:'successfuly deleted the category',
+            data: category
+        });
+        
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'server error deleting category'
+        });
+    }
+}
 

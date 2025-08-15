@@ -7,5 +7,7 @@ const categoryController = require('../controllers/categoryController');
 router.post('/',authMiddleware,authorizeRoles('ADMIN'),categoryController.createCategory);
 router.get('/all',authMiddleware,authorizeRoles('ADMIN'),categoryController.getAllCategories);
 router.put('/:id/update',authMiddleware,authorizeRoles('ADMIN','EVENT_CONDUCTOR'),categoryController.updateCategory);
+router.delete('/:id/delete',authMiddleware,authorizeRoles('ADMIN'),categoryController.deleteCategory);
+
 
 module.exports = router;
