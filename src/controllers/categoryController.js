@@ -30,6 +30,64 @@ exports.createCategory = async(req,res)=>{
 
 
 //get all categories
+exports.getAllCategories = async(req,res)=>{
+    try{
+        const categories = await prisma.category.findMany({
+            include:{
+                events:true,
+            }
+        });
+
+        return res.status(200).json({
+            success:true,
+            data: categories
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'Server error fetching categories'
+        });
+    }
+};
 //update category
+exports.updateCategory = async(req,res)=>{
+    const categoryId = parseInt(req.params.id,10);
+    const allowedFields = ['name','description','color','icon'];
+    try{
+        const category = await prisma.category.findUnique({
+            where:{
+                id:categoryId
+            }
+        });
+        if(!category){
+            return res.status(404).json({
+                success:false,
+                message:'there is no category with the given ID'
+            });
+        }
+        const dataToUpdate = {};
+        allowedFields.forEach(field => {
+            if(field in req.body){
+                dataToUpdate[field]  = req.body[field];
+            }
+        });
+        const updatedCategory = await prisma.category.update({
+            where:{id:categoryId},
+            data: dataToUpdate,
+        })
+        return res.status(200).json({
+            success:true,
+            data: updatedCategory
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"server error updating category"
+        });
+    }
+};
+
 //delete category
 
