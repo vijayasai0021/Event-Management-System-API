@@ -64,5 +64,100 @@ exports.registerForEvent = async(req,res)=>{
     }
 };
 //get all registrations of a user
+exports.getAllRegistrationsOfUser = async(req,res)=>{
+    const userId = parseInt(req.params.id,10);
+
+    try{
+        //check if the user is present or not
+        const registrations = await prisma.registration.findMany({
+            where:{
+                userId
+            },
+            include:{
+                event:true 
+            }
+        });
+
+        if(registrations.length==0){
+            return res.status(404).json({
+                success:false,
+                message:'there is no user registrations with the userId'
+            });
+        }
+
+        return res.status(200).json({
+            success:true,
+            data: registrations
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'server error fetching registrations of the user'
+        });
+    }
+};
 //cancel registration
+exports.cancelRegistation = async(req,res)=>{
+    const userId = parseInt(req.params.userId,10);
+    const eventId = parseInt(req.params.eventId,10);
+
+    try{
+        const myregistration = await prisma.registration.findFirst({
+            where:{userId,eventId},
+        });
+        if(!myregistration){
+            return res.status(404).json({
+                success:false,
+                message:"you haven't registered yet"
+            });
+        }
+
+        await prisma.registration.delete({
+            where:{
+                id:myregistration.id
+            },
+        });
+        return res.status(200).json({
+            success:true,
+            data:myregistration,
+            message:'registration successfully deleted'
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'server error cancelling registration for this event'
+        });
+    }
+};
 //get registration by ID
+exports.getRegistrationById = async(req,res)=>{
+    const registrationId = parseInt(req.params.registrationId,10);
+
+    try{
+        const myregistration = await prisma.registration.findUnique({
+            where:{
+                id:registrationId
+            },
+        });
+
+        if(!myregistration){
+            return res.status(404).json({
+                success:false,
+                message:'there is no registrations with given id'
+            });
+        }
+
+        return res.status(200).json({
+            success:true,
+            dat:myregistration
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'server error fetching details'
+        });
+    }
+};
