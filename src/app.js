@@ -20,6 +20,7 @@ const userRoutes = require('./routes/users');
 const eventRoutes = require('./routes/events');
 const registrationRoutes = require('./routes/registrations');
 const categoryRoutes = require('./routes/category');
+const additionalUsefulController  = require('./routes/additional');
 
 //  Mount routes with base paths
 app.use('/api/auth',authRoutes);
@@ -27,6 +28,7 @@ app.use('/api/users',userRoutes);
 app.use('/api/events',eventRoutes);
 app.use('/api/registrations',registrationRoutes);
 app.use('/api/category',categoryRoutes);
+app.use('/api/additional',additionalUsefulController);
 
 
 // Health-check endpoint
