@@ -21,8 +21,33 @@ exports.filterEvents=async (req, res)=>{
             tags
         }=req.query;
 
-        const filters = {};
+        const providedFilters =[
+            query,
+            city,
+            category,
+            from,
+            to,
+            feeMin,
+            feeMax,
+            maxAttendees,
+            registrationDeadline,
+            organizerId,
+            isPrivate,
+            tags
+        ];
 
+        const filterCount = providedFilters.filter(val=>{
+            return val!==undefined && val!=='' && val!==null;
+        }).length;
+        if(filterCount===0){
+            return res.status(400).json({
+                success:false,
+                message:"Provide at least one search filter."
+            });
+        }
+
+        const filters = {};
+        
         if(query){
             filters.OR = [
                 {title:{contains: query}},
@@ -70,7 +95,7 @@ exports.filterEvents=async (req, res)=>{
         }else{
             orderBy.push({startDate:'asc'});
         }
-
+        console.log('Filters',filters);
         const events  = await prisma.event.findMany({
             where: filters,
             orderBy,
