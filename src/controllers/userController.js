@@ -1,4 +1,6 @@
 const prisma = require('../prismaClient');
+const bcrypt = require('bcryptjs');
+const cyrpto = require('crypto');
 
 exports.getAllUsers = async (req,res)=>{
     const users = await prisma.user.findMany();
@@ -53,23 +55,4 @@ exports.getUserByID = async(req, res)=>{
 
 
 //password reset/change
-exports.resetPassword = async(req, res)=>{
-    const userID = parseInt(req.params.id, 10);
-    const {password} = req.body;
-    try{
-        const getPasswordID = await prisma.user.update({
-            where:{id:userID},
-            data:{password}
-        })
 
-        res.status(200).json({success:true, user:getPasswordID});
-    }catch(error){
-        console.error(error);
-        if(error.code === "P2025"){
-            return res.status(404).json({success:false, error:'enter correct user ID'});
-        }
-
-        res.status(500).json({success:false, error:'server error'});
-    }
-
-}
