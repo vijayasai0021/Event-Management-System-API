@@ -1,5 +1,9 @@
 const prisma = require('../prismaClient');
 const bcrypt = require('bcryptjs');
+<<<<<<< HEAD
+=======
+const cyrpto = require('crypto');
+>>>>>>> 9d198017be32e2407de044b5a7204c7a33e3d5d9
 
 exports.getAllUsers = async (req,res)=>{
     const users = await prisma.user.findMany();
@@ -54,6 +58,7 @@ exports.getUserByID = async(req, res)=>{
 
 
 //password reset/change
+<<<<<<< HEAD
 exports.resetPassword = async(req, res)=>{
     const userID = parseInt(req.params.id, 10);
     const {email,oldPassword,newPassword} = req.body;
@@ -86,3 +91,6 @@ exports.resetPassword = async(req, res)=>{
     }
 
 }
+=======
+
+>>>>>>> 9d198017be32e2407de044b5a7204c7a33e3d5d9
