@@ -31,4 +31,25 @@ exports.deleteUser = async(req,res)=>{
 };
 
 //get user by ID
+exports.getUserByID = async(req, res)=>{
+    const userId = parseInt(req.params.id, 10);
+    try{
+        const userIdData = await prisma.user.findUnique({
+            where:{
+                id: userId,
+            },
+        })
+
+        //user not found
+        if(!userIdData){
+            res.status(404).json({success:false, error: 'Invalid user ID'});
+        }
+
+        res.status(200).json({success: true, data: userIdData});
+    }catch(error){
+        res.status(500).json({success:false, error:'server error'});
+    }
+}
+
+
 //password reset/change

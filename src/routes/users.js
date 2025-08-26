@@ -7,4 +7,7 @@ router.get('/',authMiddleware,authorizeRoles('ADMIN'),userController.getAllUsers
 router.put('/profile',authMiddleware,userController.updateProfile);
 router.delete('/:id',authMiddleware,authorizeRoles('ADMIN'),userController.deleteUser);
 
+//route of getting data by ID
+router.get('/:id', authMiddleware, authorizeRoles('ADMIN'), userController.getUserByID);
+
 module.exports = router;
