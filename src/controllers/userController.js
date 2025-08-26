@@ -1,4 +1,6 @@
 const prisma = require('../prismaClient');
+const bcrypt = require('bcryptjs');
+
 
 exports.getAllUsers = async (req,res)=>{
     const users = await prisma.user.findMany();
@@ -31,4 +33,59 @@ exports.deleteUser = async(req,res)=>{
 };
 
 //get user by ID
+exports.getUserByID = async(req, res)=>{
+    const userId = parseInt(req.params.id, 10);
+    try{
+        const userIdData = await prisma.user.findUnique({
+            where:{
+                id: userId,
+            },
+        })
+
+        //user not found
+        if(!userIdData){
+            res.status(404).json({success:false, error: 'Invalid user ID'});
+        }
+
+        res.status(200).json({success: true, data: userIdData});
+    }catch(error){
+        res.status(500).json({success:false, error:'server error'});
+    }
+}
+
+
 //password reset/change
+
+exports.resetPassword = async(req, res)=>{
+    const userID = parseInt(req.params.id, 10);
+    const {email,oldPassword,newPassword} = req.body;
+    try{
+        const user = await prisma.user.findUnique({where: {email}});
+
+        if(!user){
+            return res.status(401).json({error:'user email does not exist'});
+        }
+        const isValid = await bcrypt.compare(oldPassword,user.password);
+
+        if(!isValid){
+            return res.status(401).json({error:'Invalid credentials'});
+        }
+        
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+        console.log('password:',hashedPassword);
+        const getPasswordID = await prisma.user.update({
+            where:{id:userID},
+            data:{password:hashedPassword}
+        })
+
+        res.status(200).json({success:true, user:getPasswordID});
+    }catch(error){
+        console.error(error);
+        if(error.code === "P2025"){
+            return res.status(404).json({success:false, error:'enter correct user ID'});
+        }
+        res.status(500).json({success:false, error:'server error'});
+    }
+
+}
+
