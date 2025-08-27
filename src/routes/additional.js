@@ -4,6 +4,8 @@ const authMiddleware = require('../middleware/authMiddleware');
 const {authorizeRoles} = require('../middleware/roleMiddleware');
 
 router.get('/filters', additionalUsefulController.filterEvents);
-
+router.get('/upcoming',additionalUsefulController.getUpcomingEvents);
+router.get('/:id/orgEvents',additionalUsefulController.getOrgainzerEvents);
+router.get('/:id/ProfileManagement',additionalUsefulController.getUserProfile);
 
 module.exports = router;

@@ -99,7 +99,7 @@ exports.filterEvents=async (req, res)=>{
         const events  = await prisma.event.findMany({
             where: filters,
             orderBy,
-            //include: {category:true,organizer:true}
+            include: {category:true,organizer:true}
         });
         return res.status(200).json({
             success:true,
@@ -115,7 +115,126 @@ exports.filterEvents=async (req, res)=>{
     }
 };
 //Get upcoming events
+exports.getUpcomingEvents = async(req,res)=>{
+    try{
+        const today = new Date();
+
+        const events = await prisma.event.findMany({
+            where:{
+                startDate :{
+                    gte: today //events starting today or later
+                }
+            },
+            orderBy:{
+                startDate: 'asc'
+            },
+            include:{
+                category:true,
+                organizer:true
+            }
+        });
+        if(!events) return res.status(400).json({success:false,message:'there are no upcoming events'});
+        return res.status(200).json({
+            success:true,
+            data:events
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:true,
+            message:'server error fetching upcoming events'
+        });
+    }
+};
 
 //get Orgainzer's events
+exports.getOrgainzerEvents = async(req,res)=>{
+    const organizerId = parseInt(req.params.id,10);
+    try{
+        if(!organizerId) return res.status(400).json({
+            success:false,
+            message:'organizer id required',
+        });
 
+        const userDetails = await prisma.user.findUnique({
+            where:{id:organizerId}
+        });
+        if(userDetails.role!="EVENT_CONDUCTOR"){
+            return res.status(400).json({
+                success:false,
+                message:"given user id doesn't match with any organizer"
+            });
+        }
+
+        const events = await prisma.event.findMany({
+            where:{organizerId},
+            orderBy:{startDate:'asc'},
+            include:{category:true}
+        });
+
+        if(!events){
+            return res.status(404).json({
+                success:false,
+                message:'there are no events with the orgainzer id'
+            });
+        }
+        return res.status(200).json({
+            success:true,
+            data:events
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'server error fetching events'
+        });
+    }
+};
 //User profile managment
+exports.getUserProfile = async(req,res)=>{
+    try{
+        const {id} = req.params;
+        if(!id){
+            return res.status(400).json({
+                success:false,
+                message:"user ID required"
+            });
+        }
+        const userId = parseInt(id,10);
+        if(isNaN(userId)){
+            return res.status(400).json({
+                success:false,
+                message:"invalid user ID"
+            });
+        }
+        const user  = await prisma.user.findUnique({
+            where:{
+                id:userId
+            },
+            select:{
+                id:true,
+                firstname:true,
+                email:true,
+                role:true,
+                createdAt:true,
+                updatedAt:true
+            }
+        });
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"user not found"
+            });
+        }
+        return res.status(200).json({
+            success:true,
+            data:user
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"server error fetching user"
+        });
+    }
+};
